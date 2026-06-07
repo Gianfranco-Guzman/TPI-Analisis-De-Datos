@@ -64,9 +64,18 @@ df = load_data()
 
 st.sidebar.header("Filtros")
 
+# Botón de reinicio: borra los valores guardados y recarga
+if st.sidebar.button("🔄 Restablecer filtros", use_container_width=True, type="primary"):
+    for key in ["filter_week", "filter_perf", "filter_stress", "filter_sleep", "filter_attendance"]:
+        if key in st.session_state:
+            del st.session_state[key]
+    st.rerun()
+
+st.sidebar.divider()
+
 week_min, week_max = int(df["week"].min()), int(df["week"].max())
 week_range = st.sidebar.slider(
-    "Semana", week_min, week_max, (week_min, week_max))
+    "Semana", week_min, week_max, (week_min, week_max), key="filter_week")
 
 perf_min, perf_max = float(df["performance_index"].min()), float(
     df["performance_index"].max())
@@ -75,6 +84,7 @@ perf_range = st.sidebar.slider(
     perf_min,
     perf_max,
     (perf_min, perf_max),
+    key="filter_perf",
 )
 
 stress_min, stress_max = float(
@@ -84,6 +94,7 @@ stress_range = st.sidebar.slider(
     stress_min,
     stress_max,
     (stress_min, stress_max),
+    key="filter_stress",
 )
 
 sleep_min, sleep_max = float(
@@ -93,6 +104,7 @@ sleep_range = st.sidebar.slider(
     sleep_min,
     sleep_max,
     (sleep_min, sleep_max),
+    key="filter_sleep",
 )
 
 attendance_min, attendance_max = float(
@@ -102,6 +114,7 @@ attendance_range = st.sidebar.slider(
     attendance_min,
     attendance_max,
     (attendance_min, attendance_max),
+    key="filter_attendance",
 )
 
 df_filtered = df[
