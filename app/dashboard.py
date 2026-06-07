@@ -64,15 +64,6 @@ df = load_data()
 
 st.sidebar.header("Filtros")
 
-# Botón de reinicio: borra los valores guardados y recarga
-if st.sidebar.button("🔄 Restablecer filtros", use_container_width=True, type="primary"):
-    for key in ["filter_week", "filter_perf", "filter_stress", "filter_sleep", "filter_attendance"]:
-        if key in st.session_state:
-            del st.session_state[key]
-    st.rerun()
-
-st.sidebar.divider()
-
 week_min, week_max = int(df["week"].min()), int(df["week"].max())
 week_range = st.sidebar.slider(
     "Semana", week_min, week_max, (week_min, week_max), key="filter_week")
@@ -116,6 +107,13 @@ attendance_range = st.sidebar.slider(
     (attendance_min, attendance_max),
     key="filter_attendance",
 )
+
+st.sidebar.markdown("---")
+if st.sidebar.button("Restablecer filtros", use_container_width=True):
+    for key in ["filter_week", "filter_perf", "filter_stress", "filter_sleep", "filter_attendance"]:
+        if key in st.session_state:
+            del st.session_state[key]
+    st.rerun()
 
 df_filtered = df[
     (df["week"].between(week_range[0], week_range[1]))
