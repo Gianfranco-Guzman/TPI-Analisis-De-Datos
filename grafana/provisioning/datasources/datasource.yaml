@@ -1,0 +1,15 @@
+apiVersion: 1
+
+datasources:
+  - name: PostgreSQL
+    uid: postgresql
+    type: grafana-postgresql-datasource
+    access: proxy
+    url: postgres:5432
+    database: tpi
+    user: grafana
+    secureJsonData:
+      password: grafana
+    jsonData:
+      sslmode: disable
+      postgresVersion: 1600
