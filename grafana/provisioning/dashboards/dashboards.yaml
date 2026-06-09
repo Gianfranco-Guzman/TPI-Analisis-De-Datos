@@ -1,0 +1,7 @@
+apiVersion: 1
+
+providers:
+  - name: TPI Dashboards
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards

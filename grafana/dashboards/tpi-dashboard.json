@@ -1,0 +1,233 @@
+{
+  "title": "TPI - Análisis de Desempeño Académico",
+  "tags": ["tpi"],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 2,
+  "refresh": "10s",
+  "time": {
+    "from": "2024-01-01T00:00:00.000Z",
+    "to": "2026-12-31T23:59:59.000Z"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Distribución del rendimiento general",
+      "description": "Cantidad de estudiantes por rango de Performance Index",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "postgresql" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "Cantidad de estudiantes",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "fillOpacity": 85,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "color": { "mode": "fixed", "fixedColor": "#4FC3F7" },
+          "min": 0,
+          "decimals": 0,
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "auto",
+        "sorting": "none",
+        "xTickLabelRotation": 0,
+        "showLegend": false,
+        "text": {
+          "valueSize": 14
+        }
+      },
+      "targets": [{
+        "datasource": { "type": "grafana-postgresql-datasource", "uid": "postgresql" },
+        "format": "table",
+        "rawSql": "SELECT\n  CASE\n    WHEN performance_index < 90 THEN '80 - 90 pts'\n    WHEN performance_index < 100 THEN '90 - 100 pts'\n    WHEN performance_index < 110 THEN '100 - 110 pts'\n    WHEN performance_index < 120 THEN '110 - 120 pts'\n    ELSE '120+ pts'\n  END AS \"Rango\",\n  COUNT(*) AS \"Estudiantes\"\nFROM student_data\nGROUP BY \"Rango\"\nORDER BY MIN(performance_index);",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 2,
+      "title": "Estrés vs Rendimiento",
+      "description": "Performance Index promedio por nivel de estrés. Cada punto representa el promedio de todos los estudiantes con ese nivel.",
+      "type": "xychart",
+      "gridPos": { "h": 9, "w": 6, "x": 0, "y": 8 },
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "postgresql" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "scaleDistribution": { "type": "linear" }
+          },
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "rendimiento_promedio" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "#4FC3F7", "mode": "fixed" } },
+              { "id": "custom.pointSize", "value": 8 }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "series": [
+          {
+            "frame": 0,
+            "x": "nivel_estres",
+            "y": "rendimiento_promedio",
+            "name": "Rendimiento promedio",
+            "show": "points",
+            "pointSize": 8,
+            "pointShape": "circle",
+            "fillOpacity": 80
+          }
+        ],
+        "seriesMapping": "manual",
+        "show": "points",
+        "pointSize": 8,
+        "pointShape": "circle",
+        "fillOpacity": 80,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [{
+        "datasource": { "type": "grafana-postgresql-datasource", "uid": "postgresql" },
+        "format": "table",
+        "rawSql": "SELECT\n  stress_level::int AS nivel_estres,\n  ROUND(AVG(performance_index)::numeric, 1) AS rendimiento_promedio\nFROM student_data\nWHERE stress_level IS NOT NULL AND stress_level <= 10\nGROUP BY stress_level::int\nORDER BY stress_level::int;",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 3,
+      "title": "Sueño vs Rendimiento",
+      "description": "Performance Index promedio por horas de sueño. Cada punto representa el promedio de todos los estudiantes con esas horas.",
+      "type": "xychart",
+      "gridPos": { "h": 9, "w": 6, "x": 6, "y": 8 },
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "postgresql" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "scaleDistribution": { "type": "linear" }
+          },
+          "color": { "mode": "palette-classic" }
+        },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "rendimiento_promedio" },
+            "properties": [
+              { "id": "color", "value": { "fixedColor": "#81D4FA", "mode": "fixed" } },
+              { "id": "custom.pointSize", "value": 8 }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "series": [
+          {
+            "frame": 0,
+            "x": "horas_sueño",
+            "y": "rendimiento_promedio",
+            "name": "Rendimiento promedio",
+            "show": "points",
+            "pointSize": 8,
+            "pointShape": "circle",
+            "fillOpacity": 80
+          }
+        ],
+        "seriesMapping": "manual",
+        "show": "points",
+        "pointSize": 8,
+        "pointShape": "circle",
+        "fillOpacity": 80,
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      },
+      "targets": [{
+        "datasource": { "type": "grafana-postgresql-datasource", "uid": "postgresql" },
+        "format": "table",
+        "rawSql": "SELECT\n  ROUND(sleep_hours::numeric, 1) AS horas_sueño,\n  ROUND(AVG(performance_index)::numeric, 1) AS rendimiento_promedio\nFROM student_data\nWHERE sleep_hours IS NOT NULL\nGROUP BY ROUND(sleep_hours::numeric, 1)\nORDER BY 1;",
+        "refId": "A"
+      }]
+    },
+    {
+      "id": 4,
+      "title": "Rendimiento promedio por perfil",
+      "description": "Performance Index promedio segmentado por perfil de estudiante (percentiles)",
+      "type": "barchart",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 17 },
+      "datasource": { "type": "grafana-postgresql-datasource", "uid": "postgresql" },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.7,
+            "fillOpacity": 85,
+            "gradientMode": "none",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "color": { "mode": "fixed", "fixedColor": "#4FC3F7" },
+          "min": 80
+        },
+        "overrides": []
+      },
+      "options": {
+        "orientation": "auto",
+        "sorting": "none",
+        "xTickLabelRotation": 0,
+        "showLegend": false
+      },
+      "targets": [{
+        "datasource": { "type": "grafana-postgresql-datasource", "uid": "postgresql" },
+        "format": "table",
+        "rawSql": "WITH percentiles AS (\n  SELECT\n    percentile_cont(0.25) WITHIN GROUP (ORDER BY performance_index) AS q1,\n    percentile_cont(0.50) WITHIN GROUP (ORDER BY performance_index) AS q2,\n    percentile_cont(0.75) WITHIN GROUP (ORDER BY performance_index) AS q3\n  FROM student_data\n)\nSELECT\n  CASE\n    WHEN sd.performance_index >= p.q3 THEN 'Excelente'\n    WHEN sd.performance_index >= p.q2 THEN 'Alto'\n    WHEN sd.performance_index >= p.q1 THEN 'Medio'\n    ELSE 'Bajo'\n  END AS perfil,\n  ROUND(AVG(sd.performance_index)::numeric, 1) AS rendimiento\nFROM student_data sd, percentiles p\nGROUP BY perfil\nORDER BY MIN(sd.performance_index);",
+        "refId": "A"
+      }]
+    }
+  ]
+}
